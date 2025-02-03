@@ -1,0 +1,525 @@
+program MainPrincipale;
+@use "screen/screen"
+@use "text/txt"
+@use "system/str"
+@use "system/memory"
+var
+	@export "risorse/charsetx.flf" "risorse/charsetx.bin" 256
+	chardata : incbin("risorse/charsetx.bin", $3000);
+	@export "risorse/intro2.flf" "risorse/intro2.bin" 0
+	image_color: IncBin("risorse/intro2_color.bin", $3800);
+	image_data: IncBin("risorse/intro2_data.bin", $6000);
+	music:incsid("risorse/allE00.sid",2);
+	music1:incsid("risorse/xef7.sid",2);
+	music2:incsid("risorse/gafa.sid",2);
+
+
+@include "2_elenchi.ras"		
+@include "3_variabili.ras"	
+@include "4_varie.ras"
+@include "5_menu.ras"	
+
+@startblock $a000 "codice verifica"	
+procedure Verifica();
+begin	
+	nuova_copia:="";
+	str::strcat(#nuova_copia,#nuova);
+	v:=str::strlen(#inserita);		
+//	moveto(1,19,hi(#screen_char_loc));
+//	PrintDecimal(v, 1);		
+//	for i:=0 to v do begin
+//		bb:=0;
+//		str::substr(#bb,#inserita, i,1);
+//		Screen::PrintString(#bb,i+4,19, #Screen::screen0);	
+//		for ii:=0 to 10 do waitnoraster(50);
+//	end;
+	
+	k:=str::strlen(#nuova_copia);	
+	for i:=0 to v do begin			
+		if ver = 0 then begin
+			a1:=0; a2:=0;
+			str::substr(#bb,#inserita, i,1);
+//			moveto(18+i,21,hi(#screen_char_loc)); 
+//			printstring(#bb,0,1);
+			str::substr(#aa,#nuova_copia, i,1);
+//			moveto(18+i,22,hi(#screen_char_loc)); 
+//			printstring(#aa,0,1);
+			for ii:=0 to 38 do begin 
+				if txt::str_compare(lettere[ii],#bb) then a1:=ii;									
+				if txt::str_compare(lettere[ii],#aa) then a2:=ii;
+			end;
+//			moveto(37,21,hi(#screen_char_loc));
+//			PrintDecimal(a1, 1);	
+//			moveto(37,22,hi(#screen_char_loc));
+//			PrintDecimal(a2, 1);
+			if k=i then begin ver:=2; end;	
+			if a1 < a2 then begin ver:=1; end;	
+			if a1 > a2 then begin ver:=2; end;
+		end;
+	end;	
+	if ver = 0 then begin
+		if q=v then begin
+			p_giocatore[turno]+=250;
+			t_giocatore[turno]+=1;	
+			pulisci();
+			Esatto();
+			M_Esatto();
+			i:=0;
+			while (i = 0) do begin   	
+				drawcolortextbox(#saddr, #caddr, #pieno, 4, 7,32, 14, 1+random()&14);
+				if (keypressed(KEY_F7) = 1) then i:=1;
+			end;
+			while (keypressed(KEY_F7) = 1) do waitforraster(0);
+			sound:=0;
+			manuale := 0;
+			sel_par := 0;
+			sel_cat:=0; 
+			ins_man_n := 0;
+			n_tentativi:=0;
+  			prima:=0;
+			m:=0;
+			es:=1;
+		end;  	
+		if v<q then ver:=1;
+		if v>q then ver:=2;	
+	end;
+    if ver = 1 then begin	
+		n_tentativi+=1;			
+		k:=str::strlen(#ins_prima);		
+	   	for i:=0 to v do begin
+			if ver2=0 then begin  
+				a1:=0; a2:=0;	
+				str::substr(#cc,#inserita, i,1);
+//				moveto(1+i,21,hi(#screen_char_loc)); 
+//				printstring(#cc,0,1);
+				str::substr(#dd,#ins_prima, i,1);
+//				moveto(1+i,22,hi(#screen_char_loc)); 
+//				printstring(#dd,0,1);
+				for ii:=0 to 38 do begin 
+					if txt::str_compare(lettere[ii],#cc) then a1:=ii;									
+					if txt::str_compare(lettere[ii],#dd) then a2:=ii;
+				end;
+//				moveto(15,21,hi(#screen_char_loc));
+//				PrintDecimal(a1, 1);	
+//				moveto(15,22,hi(#screen_char_loc));
+//				PrintDecimal(a2, 1);
+				if k=i then begin ver2:=2; end;	
+				if a1 > a2 then begin ver2:=1; end;
+				if a1 < a2 then begin ver2:=2; end;	
+				for ii:=0 to 50 do waitnoraster(50);	
+			 end; 
+		end; 
+		if ver2 = 1 then begin
+			ins_prima:=0;
+			p_prima[0]:=0;	
+			str::strcat(#ins_prima,#inserita);		
+			strsplit(#ins_prima,#p_prima,$64);
+			e_bonus:=1;
+		end;	
+		if ver2 = 2 then begin
+			for i:=1 to 38 do Screen::PrintString(" ",i,20, #Screen::screen0);
+			initsid(SIDFILE_3_INIT);
+			sound:=2;
+			Screen::PrintStringColor("SEI INDIETRO PENALITA 50 MONETE",4,20,c_cornice);
+			if p_giocatore[turno]>50 then p_giocatore[turno]-=50 else p_giocatore[turno]:=0;
+			for i:=0 to 200 do waitnoraster(200);
+			sound :=0;	
+		end;	
+	end;	
+    if ver = 2 then begin
+	    n_tentativi+=1;	
+		k:=str::strlen(#ins_dopo);	
+		for i:=0 to v do begin
+			if ver2=0 then begin  
+				a1:=0; a2:=0;
+				str::substr(#ee,#inserita, i,1);
+//				moveto(1+i,21,hi(#screen_char_loc)); 
+//				printstring(#ee,0,1);
+				str::substr(#ff,#ins_dopo, i,1);
+//				moveto(1+i,22,hi(#screen_char_loc)); 
+//				printstring(#ff,0,1);
+				for ii:=0 to 38 do begin 
+					if txt::str_compare(lettere[ii],#ee) then a1:=ii;									
+					if txt::str_compare(lettere[ii],#ff) then a2:=ii;
+				end;
+//				moveto(15,21,hi(#screen_char_loc));
+//				PrintDecimal(a1, 1);	
+//				moveto(15,22,hi(#screen_char_loc));
+//				PrintDecimal(a2, 1);
+				if k=i then begin ver2:=2; end;	
+				if a1 > a2 then begin ver2:=2; end;	
+				if a1 < a2 then begin ver2:=1; end;	
+				for ii:=0 to 50 do waitnoraster(50);
+			 end; 
+		end; 
+		if ver2 = 1 then begin
+			ins_dopo:=0;
+			p_dopo[0]:=0;	
+			str::strcat(#ins_dopo,#inserita);		
+			strsplit(#ins_dopo,#p_dopo,$64);
+			e_bonus:=1;
+		end;
+		if ver2 = 2 then begin
+			for i:=1 to 38 do Screen::PrintString(" ",i,20, #Screen::screen0);			
+			initsid(SIDFILE_3_INIT);
+			sound:=2;
+			Screen::PrintStringColor("SEI AVANTI PENALITA 50 MONETE",5,20,c_cornice);
+			if p_giocatore[turno]>50 then p_giocatore[turno]-=50 else p_giocatore[turno]:=0;
+			for i:=0 to 200 do waitnoraster(200);
+			sound :=0;
+		end;	
+	end;
+	ver2:= 0;
+	ver:= 0;
+end;
+@endblock
+@startblock $4800 "codice main 2"
+procedure ReadLine();
+begin	
+	cur:=0;	
+ 	isNotDone:=1; 			
+	while (isNotDone=1) do begin	
+	WaitnoRaster(200);
+			renderChar:=1;	
+			key:=getKey();  		
+		if (keypressed(KEY_F7) = 1) then begin 
+			if n_menu = 2 then begin hh:=0; ins_menu:=0;  n_menu:=0; end;
+	 		if n_menu = 1 then n_menu:=0;
+			m:=0;
+			cur:=0;
+			renderChar:=0;
+			isNotDone:=0; 
+		end;	
+		if n_menu = 1 then begin
+			if ( keypressed( KEY_F3 ) = 1 ) then begin 
+				n_menu:=3;
+				m:=0;
+				cur:=0;
+				renderChar:=0;
+				isNotDone:=0; 
+			end;					
+		end;		
+		if (key=$FF) then firstKey:=0;		
+		if (key<>$FF and reset=0) then begin
+			if (firstKey=0) then reset:=8 else reset:=4;				
+			firstKey:=1;
+			if (key=$F7) then begin // backspace				
+				screenmemory[cur]:=key_space;
+				if (cur<>0) then cur:=cur-1;
+				screenmemory[cur]:=key_space;				
+				renderChar:=0;		
+			end;
+			if (key=$8E) then begin // return 								
+				renderChar:=0;				
+				if n_menu=1 then begin 	
+					if cur>0 then begin
+						inserita[cur]:=0;
+						cur:=0;					
+						Verifica();	
+						p_giocatore[turno]-=50;	
+						if es=0 then begin
+							if e_bonus=1 then begin								
+								M_Bonus();							
+								M_Gioca();		 						
+							end else begin
+								e_bonus:=1;
+								M_Gioca();							
+							end;
+							e_bonus:=0;								
+						end;					
+						if turno <n_giocatori-1 then turno+=1 else turno:=0;
+						while (p_giocatore[turno]<50 or p_giocatore[turno]=0 ) do begin
+							if p_giocatore[turno]<50 then p_giocatore[turno]:=0;
+							if turno <n_giocatori-1 then turno+=1 else turno:=0;	
+						end;
+						es:=0;						
+						m:=0;						
+					end;
+				end;
+				if n_menu=2 then begin 
+					if cur>0 then begin
+					inserita[cur]:=$64;
+					inserita[cur+1]:=0;					
+					InsGiocatori();	
+					if n_giocatori>10 then pagina:=1;			
+					end;												
+				end; 			
+				cur:=0;
+				isNotDone:=0;				
+			end;
+			if (renderChar=1) then begin
+				if (key<>$8E) then begin 
+					inserita[cur]:=key;
+					if (key>64 and key<91) then key:=key-64;
+					screenmemory[cur]:=key;	
+					if n_menu=2 then begin
+						if cur < 10 then inc(cur); 
+					end else if cur < 18 then inc(cur);
+				end;				
+			end;
+		end;
+		inc(blink);		
+		if (blink=32) then screenmemory[cur]:=$44;
+		if (blink=64) then begin screenmemory[cur]:=key_space; blink:=0; end;		
+		if (reset<>0) then reset-=1;		
+	end;
+end;
+
+procedure ReadLine2();
+begin	
+	cur:=0;	
+ 	isNotDone:=1; 	
+	if ins_man_n = 0 then moveto(18,7,hi(screen_char_loc));
+	if ins_man_n = 1 then moveto(19,15,hi(screen_char_loc)); 	
+	if ins_man_n = 2 then moveto(16,17,hi(screen_char_loc)); 		
+	while (isNotDone=1) do begin	
+	//	Screen::WaitForRaster(0);
+		WaitnoRaster(200);
+		renderChar:=1;			
+		key:=getKey();  		
+		if (keypressed(KEY_F7) = 1) then begin 
+			ins_man_n:= 0;
+	 		n_menu:=0;
+	 		manuale:=0;
+			m:=0;
+			cur:=0;
+			renderChar:=0;
+			isNotDone:=0; 
+		end;				
+		if (key=$FF) then firstKey:=0;		
+		if (key<>$FF and reset=0) then begin
+			if (firstKey=0) then reset:=8 else reset:=4;				
+			firstKey:=1;
+			if (key=$F7) then begin // backspace				
+				screenmemory[cur]:=key_space;
+				if (cur<>0) then cur:=cur-1;
+				screenmemory[cur]:=key_space;				
+				renderChar:=false;		
+			end;
+			if (key=$8E) then begin // return 
+				if ins_man_n = 2 then begin	
+					ins_man_ver[cur]:=0;
+					if txt::str_compare(#ins_man,#ins_man_ver) then begin
+						Screen::PrintStringColor("OK",16,17,c_nomi);				
+						Screen::PrintStringColor("VERIFICA OK COMINCIA A GIOCARE",5,20,c_nomi);
+						Screen::PrintString("F1 - GIOCA",29,23, #Screen::screen0);
+						while (ok<1) do if (keypressed(KEY_F1) = 1) then ok:=1;					
+						ok:=0;
+						manuale:=1;
+						sel_par:=1;
+						cur:=0;														
+						m:=0;				 				
+						isNotDone:=0;	
+					end else begin				
+						Screen::PrintStringColor("LA PAROLA NON COINCIDE",9,20,c_cornice);
+						renderChar:=0;							
+						cur:=0;																	 				
+					end;				
+				end;
+				if ins_man_n = 1 then begin							
+					ins_man[cur]:=0;
+					cur:=0;																		 				
+					isNotDone:=0;
+					ins_man_n :=2;	
+					Screen::PrintStringColor("OK",19,15,c_nomi);
+				end;				
+				if ins_man_n = 0 then begin
+					renderChar:=0;							
+					cat_man[cur]:=0;
+					cur:=0;																	 				
+					isNotDone:=0;
+					ins_man_n :=1;
+					Screen::PrintStringColor("                   ",18,7,c_nomi);
+					Screen::PrintStringColor(#cat_man,18,7,c_nomi);
+				end;						
+			end;			
+			if (renderChar=1) then begin
+				if (key<>$8E) then begin 	
+				if ins_man_n = 0 then cat_man[cur]:=key;
+				if ins_man_n = 1 then ins_man[cur]:=key;
+				if ins_man_n = 2 then ins_man_ver[cur]:=key;				
+				if (key>64 and key<91) then key:=key-64;				
+				if ins_man_n = 0 then screenmemory[cur]:=key;			
+				if cur < 18 then inc(cur);
+				end;				
+			end;
+		end;
+		inc(blink);		
+		if (blink=32) then if ins_man_n = 0 then screenmemory[cur]:=$44 else screenmemory[0]:=$44;
+		if (blink=64) then begin 
+			if ins_man_n = 0 then begin				
+				screenmemory[cur]:=key_space; 
+				blink:=0; 
+			end else begin
+				screenmemory[0]:=key_space; 
+				blink:=0;	
+			end;
+		end;
+		if (reset<>0) then dec(reset);		
+	end;
+end;
+	
+procedure M_MENU(); 
+begin	
+	if n_menu=0 then begin
+		if m=0 then begin M_Principale(); m:=1; end;	     	
+	   	if ( keypressed( KEY_F1 ) = 1 ) then begin  
+			if n_giocatori = 0 then  n_menu:=2 else	n_menu:=1; 				
+			m:=0;
+			cur:=0;	
+			for i:=0 to 25 do waitnoraster(50);
+		end;		
+		if ( keypressed( KEY_F3 ) = 1 ) then begin cur:=0; n_menu:=2; m:=0; for i:=0 to 25 do waitnoraster(50); end;
+		if ( keypressed( KEY_I ) = 1 ) then begin  int:=0; INTRO(); m:=0;  end;
+		if ( keypressed( KEY_C ) = 1 ) then begin 
+			while (keypressed(KEY_E ) < 1) then begin
+				if ( keypressed( KEY_1 ) = 1 ) then	begin if c_sfondo<15  then if c_sfondo+1=1 then c_sfondo:=2 else c_sfondo+=1 else c_sfondo:=0; M_Principale(); ky:=0; end; 
+				if ( keypressed( KEY_2 ) = 1 ) then begin if c_bordo<15 then c_bordo+=1 else c_bordo:=0; M_Principale(); ky:=0; end;
+				if ( keypressed( KEY_3 ) = 1 ) then begin if c_cornice<15 then c_cornice+=1 else c_cornice:=0; M_Principale(); ky:=0;end;
+				if ( keypressed( KEY_4 ) = 1 ) then begin if c_nomi<15 then c_nomi+=1 else c_nomi:=0; M_Principale(); ky:=0; end;
+				if ( keypressed( KEY_5 ) = 1 ) then begin if c_char<15 then c_char+=1 else c_char:=0; M_Principale(); ky:=0; end;	
+				if ( keypressed( KEY_R ) = 1 ) then begin
+					c_sfondo:=0;
+					c_bordo:=0;
+					c_cornice:=10;
+					c_nomi:=3;
+					c_char:=1; 
+					M_Principale();
+					ky:=0;
+				end;
+				if (ky=0) then begin;
+					Screen::PrintStringColor("MENU CAMBIA COLORI",11,9, c_nomi);
+					Screen::PrintStringColor("   1.SFONDO    ",12,13, 1);
+					Screen::PrintStringColor("   2.BORDO     ",12,14, 1);
+					Screen::PrintStringColor("   3.CORNICE   ",12,15, 1);
+					Screen::PrintStringColor("   4.NOMI      ",12,16, 1);
+					Screen::PrintStringColor("   5.CARATTERI ",12,17, 1);
+					Screen::PrintStringColor("   R.RESET     ",12,19, 1);
+					Screen::PrintString("E - ESCI CAMBIA COLORI                ",1,23, #Screen::screen0);									
+				ky:=1;				
+				end;
+				for i:=0 to 25 do waitnoraster(25);			
+			end;
+			ky:=0;
+			m:=0;
+		end;		
+		screenmemory:=$D800+40*4;			
+		screenmemory[time+6]:=col;
+		screenmemory:=$D800+40*6;			
+		screenmemory[26-time+6]:=col;		 
+		waitnoraster(100);		
+		if time2&20=0 then inc(time);
+		inc(time2);
+		if time = 27 then begin inc(col); time:=0; end;
+		if col = 16 then col:=1;
+	end;	
+	if n_menu=1 then begin			
+		if sel_par=0 then begin		
+			if manuale = 0 then begin
+				if m=0 then begin M_Categoria(); m:=1; end; 
+				if ( keypressed( KEY_1 ) = 1 ) then begin  sel_cat:=1; sel_par:=1; m:=0; end;
+				if ( keypressed( KEY_2 ) = 1 ) then begin  sel_cat:=2; sel_par:=1; m:=0; end;
+				if ( keypressed( KEY_3 ) = 1 ) then begin  sel_cat:=3; sel_par:=1; m:=0; end;
+				if ( keypressed( KEY_4 ) = 1 ) then begin  sel_cat:=4; sel_par:=1; m:=0; end;
+				if ( keypressed( KEY_5 ) = 1 ) then begin  sel_cat:=5; sel_par:=1; m:=0; end;
+				if ( keypressed( KEY_6 ) = 1 ) then begin  sel_cat:=6; sel_par:=1; m:=0; end;
+				if ( keypressed( KEY_7 ) = 1 ) then begin  sel_cat:=7; sel_par:=1; m:=0; end;
+				if ( keypressed( KEY_8 ) = 1 ) then begin  sel_cat:=8; sel_par:=1; m:=0; end;
+				if ( keypressed( KEY_A ) = 1 ) then begin  sel_cat:=9; sel_par:=1; m:=0; end;
+				if ( keypressed( KEY_B ) = 1 ) then begin  sel_cat:=10; sel_par:=1; m:=0; end;
+				if ( keypressed( KEY_C ) = 1 ) then begin  sel_cat:=11; sel_par:=1; m:=0; end;
+				if ( keypressed( KEY_D ) = 1 ) then begin  sel_cat:=12; sel_par:=1; m:=0; end;
+				if ( keypressed( KEY_E ) = 1 ) then begin  sel_cat:=13; sel_par:=1; m:=0; end;
+				if ( keypressed( KEY_F ) = 1 ) then begin  sel_cat:=14; sel_par:=1; m:=0; end;
+				if ( keypressed( KEY_G ) = 1 ) then begin  sel_cat:=15; sel_par:=1; m:=0; end;
+				if ( keypressed( KEY_H ) = 1 ) then begin  sel_cat:=16; sel_par:=1; m:=0; end;							
+				if ( keypressed( KEY_I ) = 1 ) then begin  manuale:=1; m:=0; end;
+				if ( keypressed( KEY_F7 ) = 1 ) then begin n_menu:=0; m:=0; end;
+			end else begin			
+				if m=0 then begin M_Manuale(); m:=1; end;					
+				ReadLine2();			
+			end;
+		end else begin 	
+			if (prima=0 and m=0) then begin NuovaParola(); prima:=1;  end;
+			if (prima=1 and m=0) then begin M_Gioca(); m:=1; end;			
+			if (prima=1 and m=1) then begin moveto(19,20,hi(screen_char_loc)); ReadLine(); end;				 
+		end;			
+	end;	
+	if n_menu=2 then begin
+		if m=0 then begin M_Classifica(); m:=1; end;  
+		if (ins_menu<>1 and n_giocatori<20) then if ( keypressed( KEY_F1 ) = 1 or n_giocatori=0 ) then ins_menu:=1;  
+ 		if ( keypressed( KEY_P ) = 1) then begin 
+			if pagina=0 then pagina:=1 else pagina:=0;
+			hh:=1;
+			for i:=0 to 25 do waitnoraster(100);
+			m:=0;
+		end; 
+		if ( keypressed( KEY_F7 ) = 1 ) then begin hh:=0; n_menu:=0; m:=0; end;
+		if ins_menu=1 then begin
+			M_Classifica();
+			if n_giocatori<20 then begin
+				Screen::PrintString("NUOVO GIOCATORE:",1,21, #Screen::screen0);
+				moveto(18,21,hi(screen_char_loc));	
+				ReadLine();	
+			end else begin
+				Screen::PrintString("NUMERO MASSIMO RAGGIUNTO",1,21, #Screen::screen0);
+				for i:=0 to 200 do waitnoraster(200);
+				n_menu:=0;
+				ins_menu:=0; 
+				m:=0;
+			end;			 	
+		end;		
+	end;	
+	if n_menu=3 then begin
+		if m=0 then begin M_Opzioni(); m:=1; end; 					
+			if ( keypressed( KEY_1 ) = 1 ) then begin
+				if n_giocatori=1 then Screen::PrintStringColor("GIOCATORE SINGOLO",14,13,c_nomi)
+				else begin
+				Screen::PrintStringColor("PENALITA 250 MONETE",14,13,c_nomi);
+				Screen::PrintString("    ATTENDERE...   ",20,23, #Screen::screen0);	
+				if p_giocatore[turno]>250 then p_giocatore[turno]-=250 else p_giocatore[turno]:=0;	
+						if turno <n_giocatori-1 then turno+=1 else turno:=0;				
+						while (p_giocatore[turno]<50 or p_giocatore[turno]=0 ) then begin
+							if p_giocatore[turno]<50 then p_giocatore[turno]:=0;
+							if turno <n_giocatori-1 then turno+=1 else turno:=0;	
+						end;				
+				n_menu:=1; m:=0; 
+				for i:=0 to 200 do waitnoraster(200);	
+				end;									
+			end;
+			if ( keypressed( KEY_2 ) = 1 ) then begin  
+				Screen::PrintStringColor(#nuova,14,19, c_nomi);
+				Screen::PrintString("    ATTENDERE...   ",20,23, #Screen::screen0);	
+				for i:=0 to 200 do waitnoraster(200);
+				manuale := 0;
+				sel_par := 0;
+				sel_cat:=0; 
+				ins_man_n := 0;
+				prima:=0;
+				n_menu:=1; 
+				m:=0; 
+			end;
+		if ( keypressed( KEY_F1 ) = 1 ) then begin  n_menu:=1; m:=0; end;     	
+	end;			
+end;	
+@endblock
+
+begin	
+	disableciainterrupts();
+	setmemoryconfig(1,0,0);	
+	Casuale(); 
+	c_sfondo:=0;
+	c_bordo:=0;
+	c_cornice:=10;
+	c_nomi:=3;
+	c_char:=1;
+	initsid(SIDFILE_1_INIT);
+	startrasterchain(Raster(),0,0);
+	INTRO();
+	createaddresstable(#saddr,#screen_char_loc,screen_width,screen_height);
+	createaddresstable(#caddr,#screen_col_loc,screen_width,screen_height); 
+	while (true) do	begin	
+		M_MENU();
+	end;		
+	loop();	
+end.

@@ -1,0 +1,242 @@
+var
+@startblock $b900 "codice menu"	
+procedure M_Esatto();
+begin		
+	Screen::PrintString("TENTATIVO",1,4, #Screen::screen0);
+	moveto(11,4,hi(screen_char_loc));
+	printdecimal(n_tentativi+1,1);	
+	zp:=strgetfromindex(#gio,i);
+	pf:=str::strlen(zp);
+	Screen::PrintStringColor(zp,(20-pf/2),9,c_nomi);	
+	//Screen::PrintStringColor(zp,10,9, 1);	
+	Screen::PrintStringColor("HAI TROVATO LA PAROLA!!!",8,12,c_char);
+	pf:=str::strlen(#nuova);
+	Screen::PrintStringColor(#nuova,(20-pf/2),14,c_nomi);	
+	Screen::PrintStringColor("VINCI 250 MONETE",12,17,c_char);	
+	Screen::PrintString("F7 - ESCI",30,23, #Screen::screen0);
+end;
+
+procedure M_Principale();
+begin		
+	pulisci();
+	Screen::PrintStringColor("---------------------------",6,4,c_cornice);
+	Screen::PrintStringColor("T R O V A  L A  P A R O L A",6,5,c_cornice);
+	Screen::PrintStringColor("---------------------------",6,6,c_cornice);
+	Screen::PrintStringColor("MENU PRINCIPALE",12,9, c_nomi);
+	Screen::PrintString("F1 - GIOCA",14,13, #Screen::screen0);
+	Screen::PrintString("F3 - CLASSIFICA",12,17, #Screen::screen0);
+	Screen::PrintString("I - INTRO",30,23, #Screen::screen0);
+	Screen::PrintString("C - CAMBIA COLORI",1,23, #Screen::screen0);
+end;
+
+	
+procedure M_Gioca();
+begin
+	pulisci();	
+	Screen::PrintStringColor("TENTATIVI",13,1, c_nomi);	
+	moveto(23,1,hi(screen_char_loc));
+	printdecimal(n_tentativi,1);		
+	screenmemory := SCREEN_COL_LOC+40*(1);
+	for i:=13 to 25 do screenmemory[i] := c_nomi;
+
+//	moveto(4,18,hi(#screen_char_loc)); 
+//	printstring(#nuova,0,40);
+//	moveto(1,18,hi(#screen_char_loc));
+//	printDecimal(q,1);
+	
+	Screen::PrintString("GIOCATORE",7,4, #Screen::screen0);
+	moveto(17,4,hi(screen_char_loc));
+	printdecimal(turno+1,1);
+	Screen::PrintString("MONETE",21,4, #Screen::screen0);
+	moveto(28,4,hi(screen_char_loc));
+	printdecimal(p_giocatore[turno],3);	
+	zp:=strgetfromindex(#gio,turno);
+	pf:=str::strlen(zp);
+	Screen::PrintStringColor(zp,(20-pf/2),6,c_nomi);
+	for i:=0 to pf do Screen::PrintStringColor("-",((20-pf/2)+i),7,c_sfondo+1); 		 
+	Screen::PrintString("CATEGORIA:",7,9, #Screen::screen0);
+	if manuale =0 then begin 
+	if sel_cat<9 then Screen::PrintStringColor(Categorie[sel_cat-1],17,9,c_cornice)
+	else Screen::PrintStringColor(Categorie2[sel_cat-1-8],17,9,c_cornice);	
+	Screen::PrintString("  ",17,9, #Screen::screen0);
+	end	else Screen::PrintStringColor(#cat_man,19,9,c_cornice); 	
+	Screen::PrintString("TROVA LA PAROLA COMPRESA",8,12, #Screen::screen0);
+	Screen::PrintString("IN ORDINE ALFABETICO TRA",8,14, #Screen::screen0);		
+	if n_partita > 0 then begin 		
+		pp:=str::strlen(#p_prima);
+		Screen::PrintStringColor(strgetfromindex(#p_prima,0),10-pp/2,17,c_nomi);		
+		pd:=str::strlen(#p_dopo);
+		Screen::PrintStringColor(strgetfromindex(#p_dopo,0),30-pd/2,17,c_nomi);	
+	end;
+	Screen::PrintString("<>",19,17, #Screen::screen0);	
+	if e_bonus=0 then begin						
+		Screen::PrintString("INSERISCI PAROLA:",1,20, #Screen::screen0);	
+		Screen::PrintString("F3 - OPZIONI",1,23, #Screen::screen0);
+		Screen::PrintString("F7 - ESCI",30,23, #Screen::screen0);
+	end else begin
+		Screen::PrintStringColor("      RIPROVA!!    ",10,20,c_cornice);
+		for i:=0 to 50 do waitnoraster(50);
+		Screen::PrintStringColor("SPAZIO PER CONTINUARE",10,22,c_cornice);
+		i:=0;
+		while (i = 0) do begin   	
+			flash:=1+random()&6;
+			fill( ^$D800+22*40+5, flash,30);
+			waitnoraster(250);
+			if (keypressed(KEY_SPACE) = 1) then i:=1;
+		end;
+		while (keypressed(KEY_SPACE) = 1) do waitforraster(0);	
+	end;	
+end;
+	
+procedure M_Classifica();
+begin
+	pulisci();		
+	if hh=0 then if ins_menu=0 then pagina:=0;
+	if (n_giocatori=0) then begin
+		Screen::PrintString("INSERISCI UN GIOCATORE",8,10, #Screen::screen0);
+	end else begin
+		Screen::PrintStringColor("ELENCO GIOCATORI",12,3, c_cornice);
+		Screen::PrintStringColor("----------------",12,4, c_cornice);	
+		Screen::PrintString("  N. NOME            MONETE  TROVATE",1,6, #Screen::screen0);
+	end;
+	if (ins_menu<>1 and n_giocatori<20) then Screen::PrintString("F1 - INSERISCI",1,23, #Screen::screen0);
+	if (n_giocatori>9 and ins_menu<>1) then Screen::PrintString("P - SCORRI",18,23, #Screen::screen0);
+	Screen::PrintString("F7 - ESCI",30,23, #Screen::screen0);	
+	if (n_giocatori>0) then begin	
+		if (pagina = 1) then begin
+			ia:=10;
+			ib:=n_giocatori;			
+		end else begin 
+			ia:=0;
+			if n_giocatori <10 then ib:=n_giocatori else ib:=10;
+		end;
+		cl:=0;
+		for i:=ia to (ib) do begin	
+			if cl=0 then begin
+				screenmemory := SCREEN_COL_LOC+40*(i+8-ia);
+				for ii:=1 to 39 do screenmemory[ii] := c_char;
+				cl:=1
+			end else begin
+				screenmemory := SCREEN_COL_LOC+40*(i+8-ia);
+				for ii:=1 to 39 do screenmemory[ii] := c_nomi;
+				cl:=0;	
+			end;			
+			zp:=strgetfromindex(#gio,i);
+			Screen::PrintString(zp,6,i+8-ia, #Screen::screen0);			
+			moveto(3,i+8-ia,hi(screen_char_loc));
+			printdecimal(i+1,1);			
+			moveto(23,i+8-ia,hi(screen_char_loc));
+			printdecimal(p_giocatore[i],3);	
+			moveto(33,i+8-ia,hi(screen_char_loc));
+			printdecimal(t_giocatore[i],0);	
+			if i=turno then begin
+				Screen::PrintStringColor(">",1,i+8-ia, c_cornice);
+			end;			
+		end;
+	end;	
+end;
+
+procedure M_Categoria();
+begin
+	pulisci();	
+	Screen::PrintStringColor("SCEGLI LA PAROLA DA TROVARE",6,4,c_cornice);
+	Screen::PrintStringColor("---------------------------",6,5,c_cornice);	
+	Screen::PrintString("PAROLA SCELTA IN MODO CASUALE",5,7, #Screen::screen0);
+	Screen::PrintString("SELEZIONA CATEGORIA",10,9, #Screen::screen0);
+	for i:=0 to 8 do Screen::PrintString(Categorie[i],1,i+12, #Screen::screen0);
+	for i:=0 to 8 do Screen::PrintString(Categorie2[i],20,i+12, #Screen::screen0);
+	cl:=0;
+	for i:=0 to 4 do begin
+		screenmemory := SCREEN_COL_LOC+40*(i+12+cl);
+		for ii:=1 to 39 do screenmemory[ii] := c_nomi;
+		cl+=1;	
+	end;
+	Screen::PrintString("I - INSERISCI",1,23, #Screen::screen0);
+	Screen::PrintString("F7 - ESCI",30,23, #Screen::screen0);		
+end;
+
+
+procedure M_Manuale();
+begin 
+	pulisci();	
+	Screen::PrintStringColor("INSERISCI LA PAROLA DA TROVARE",5,4,c_cornice);
+	Screen::PrintStringColor("------------------------------",5,5,c_cornice);	
+	Screen::PrintString("CATEGORIA:",7,7, #Screen::screen0);
+	Screen::PrintString("INSERIRE DUE VOLTE LA PAROLA",5,10, #Screen::screen0);
+	Screen::PrintString("I CARATTERI NON VERRANNO VISUALIZATI",2,12, #Screen::screen0);	
+	Screen::PrintString("INSERISCI PAROLA:",1,15, #Screen::screen0);
+	Screen::PrintString("RIPETI PAROLA:",1,17, #Screen::screen0);
+	Screen::PrintString("F7 - ESCI",30,23, #Screen::screen0);	
+end;
+
+procedure M_Opzioni();
+begin
+	pulisci();
+	Screen::PrintStringColor("OPZIONI DI GIOCO",12,5, c_cornice);
+	Screen::PrintStringColor("----------------",12,6, c_cornice);
+	Screen::PrintString("1 - SALTA IL TURNO",10,10, #Screen::screen0);
+	Screen::PrintString("2 - SVELA LA PAROLA",10,16, #Screen::screen0);	
+	Screen::PrintString("F1 - TORNA AL GIOCO",20,23, #Screen::screen0);		
+end;
+
+procedure M_Bonus();
+begin
+	ClearScreen($20, ^$0400);
+	ClearScreen(1, ^$D800);
+	drawcolortextbox(#saddr, #caddr, #box, 0, 0, 40, 25, 10);
+	Screen::PrintStringColor("PREMIO DI CONSOLAZIONE",9,4, c_cornice);
+	Screen::PrintStringColor("----------------------",9,5, c_cornice);	
+	Screen::PrintStringColor(zp,(20-pf/2),7,c_nomi);			
+	Screen::PrintString("ATTENDERE PREGO ...",12,9, #Screen::screen0);
+	if cabo<8 then cabo+=1 else cabo:=0 ;
+	if (casubon[cabo] >0 and casubon[cabo] <10) then
+	bon:= casubon[cabo] else bon:=(1+random()&8);
+	bon1:=9;	 	
+	for i1:=0 to 3 do begin
+  		q1:=0;
+  		if i1=2 then bon1:=bon;
+		for i:=0 to bon1 do begin
+			Screen::PrintString("            ",10,12, #Screen::screen0);
+			Screen::PrintString("            ",10,13, #Screen::screen0);
+			h1:=0;	
+			if (i=5 or i=6) then screen := $0400+12*40+18 else screen := $0400+12*40+19;  
+			if (i=5 or i=6) then l1:=4 else l1:=2;
+			for ii:=0 to l1 do begin		
+				screen[h1] := datasette[q1];	 				
+				screen[h1+40] := datasette[q1+l1];
+				h1+=1;
+				q1+=1;	
+			end;
+			q1+=l1;
+			for iii:=0 to 50 do waitnoraster(25);
+		end;
+	end;					               
+	Screen::PrintString("   HAI VINTO UN     ",11,9, #Screen::screen0);
+	moveto(19,19,hi(screen_char_loc));
+	Screen::PrintString("VALORE     MONETE",12,19, #Screen::screen0);
+	Screen::PrintString("      ATTENDERE ...",20,23, #Screen::screen0);
+	case bon of														
+		1: begin bon2:=25; printdecimal(25,2); Screen::PrintString 	("  CARTRIDGE   ",13,15, #Screen::screen0); end;
+		2: begin bon2:=50; printdecimal(50,2); Screen::PrintString 	("     LOGO     ",13,15, #Screen::screen0);end;
+		3: begin bon2:=30; printdecimal(30,2); Screen::PrintString 	("  DATASETTE   ",13,15, #Screen::screen0);end;
+		4: begin bon2:=5; printdecimal(5,2); Screen::PrintString   	("    NASTRO    ",13,15, #Screen::screen0);end;
+		5: begin bon2:=10; printdecimal(10,2); Screen::PrintString 	(" FLOPPY DISK  ",13,15, #Screen::screen0);end;
+		6: begin bon2:=200; printdecimal(200,2); Screen::PrintString(" COMMODORE 64 ",13,15, #Screen::screen0);end;
+		7: begin bon2:=100; printdecimal(100,2); Screen::PrintString("  DRIVE 1541  ",13,15, #Screen::screen0);end;
+		8: begin bon2:=150; printdecimal(150,2); Screen::PrintString(" MONITOR 1702 ",13,15, #Screen::screen0);end;
+		9: begin bon2:=15; printdecimal(15,2); Screen::PrintString 	("   JOYSTIK    ",13,15, #Screen::screen0);end;
+	end;			
+	i:=0;			
+	while (i < 250) do begin  	
+		flash:=1+random()&6;
+		fill( ^$D800+12*40+5, flash,30);
+		fill( ^$D800+13*40+5, flash,30);
+		fill( ^$D800+15*40+5, flash,30);
+		waitnoraster(250);
+		i+=1;
+	end;			
+	p_giocatore[turno]+=bon2;	
+end;
+@endblock
+
+
