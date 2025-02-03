@@ -1,5 +1,5 @@
 Trova La Parola Gioco testuale per Commodore 64
-Ispirato al gioco "indovina la parola" di Roberto GRW
+Ispirato a "indovina la parola", gioco in basic di Roberto GRW
 
 ![schermata1](https://github.com/user-attachments/assets/e0f39470-1732-4f27-963e-014c93dc543c)
 
