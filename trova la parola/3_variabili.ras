@@ -1,0 +1,100 @@
+var  
+	i,ii,iii,i1,ia,ib,m,s_m,v,q,t,d,prima,k,time1,time2,a,pp,pd,pf,ky,es:byte=0;
+	x,y,x1,y1,b,h,col,cl,e_col,pagina,q1,h1,l1,j,caso,cabo,ng,e_b,flash,hh,sound:byte;
+	int:byte=1;
+	n_partita:byte=0;
+	n_giocatori:byte=0;	
+	n_tentativi:byte=0;	
+	turno: byte;
+	info, info1: byte;
+	n_menu: byte;//0=principale_1=gioca_2=classifica_3=impostazioni
+	ins_menu: byte;
+	ok:byte;
+	a1,a2:byte;	
+	ver, ver2:byte; 
+	ins_i_prima: string="AAA";
+	ins_i_dopo: string="ZZZ";	
+	ito: string;	
+	nuova_copia:string;	
+	zp:pointer;
+	isNotDone, renderChar : byte=0;
+	cur,reset,firstKey, blink, key, prevKey: byte = 0;
+	
+	casubon : array[9] of byte;
+	casuale50 : array[50] of byte; // Array per i numeri unici
+	casuale25 : array[25] of byte; // Array per i numeri unici
+	uguale:byte;    // Flag di unicità
+	// colori
+	c_sfondo:byte;
+	c_bordo:byte;
+	c_cornice:byte;
+	c_nomi:byte;
+	c_char:byte;
+	c_color:byte;
+	
+	sel_cat:byte;
+	sel_par:byte;
+	manuale : byte;
+	ins_man_n : byte;
+	box: array[8] of byte = (85, 67, 73, 93, 75, 68, 74, 94);
+	pieno: array[8] of byte = ($53, $53, $53, $53, $53, $53, $53, $53);
+	
+	saddr: array[screen_height] of integer; // Screen address table
+	caddr: array[screen_height] of integer; // Color adress table
+	
+	Categorie : array[8] of string =("1.GIOCHI C64", "2.CONSOLE VINTAGE", "3.SOFTWARE HOUSE", "4.MARCHE AUTO", "5.NAZIONI","6.SPORT","7.CITTA ITALIANE", "8.ANIMALI");
+	Categorie2 : array[8] of string =("A.STRUMENTI MUSICA", "B.FILM FAMOSI", "C.PROFESSIONI", "D.DOLCI", "E.FRUTTA","F.FIORI","G.VERDURA", "H.PIATTI ITALIANI");
+
+	text: cstring=( "                                          ",
+					"               PREMI SPAZIO               ",
+					"                 F1 - INFO                ",
+					"               			               ",);
+						
+	scroll: byte = 0;
+	time : integer = 0;
+	tp:pointer;
+	bon:byte=0;
+	bon1:byte=0;
+	bon2:byte=0;
+	e_bonus:byte;	
+	const yp:byte = 24;
+	const yv:byte = yp*8+43;	
+	datasette : array[44] of byte = (138,139,178,179,
+									140,141,180,181,
+									142,143,182,183,
+									144,145,184,185,
+									146,147,186,187,
+									148,149,150,151,188,189,190,191,
+									152,153,154,155,192,193,194,195,
+									156,157,196,197,
+									158,159,198,199,);
+	buio : array[1] of byte = (27);
+	screen:pointer;
+	screencol:pointer;
+	
+@userdata $a800 $b3ff "Variables"	
+@startblock $a800 "Variables" 
+	inserita : array[20] of  ^byte;// at $4000;// at $b000;	
+	p_giocatore: array[20] of integer;// at $4000;
+	t_giocatore: array[20] of integer;
+	nuova:array[20] of  ^byte;
+	cat_man : array[20] of  ^byte;
+	ins_man : array[20] of  ^byte;
+	ins_man_ver : array[20] of  ^byte;	
+	aa:array[20] of  string;	
+	bb:array[20] of  string;
+	cc:array[20] of  string;	
+	dd:array[20] of  string;
+	ee:array[20] of  string;	
+	ff:array[20] of  string;					
+	ins_prima: array[20] of ^byte;// at $b300;
+	ins_dopo: array[20] of ^byte;// at $b400;	
+	p_prima : array[20] of  ^byte;// at $b500;
+	p_dopo : array[20] of  ^byte;// at $b600;	
+@endblock
+
+@userdata $b400 $b8ff "lista giocatori"	
+	lista: array[1] of ^byte at $b400;	
+	gio : array[20] of  ^byte at $b500;
+
+
